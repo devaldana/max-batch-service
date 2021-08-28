@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS artist_genres;
+DROP TABLE IF EXISTS artists;
+DROP TABLE IF EXISTS genres;
+
+CREATE TABLE artists(
+    id  BIGINT NOT NULL AUTO_INCREMENT,
+    type_id BIGINT NOT NULL,
+    name VARCHAR(1000),
+    url VARCHAR(1000),
+    PRIMARY KEY (id)
+)
