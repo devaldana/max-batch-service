@@ -1,37 +1,35 @@
 package net.musicaudience.batch;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.musicaudience.batch.mappers.*;
+import net.musicaudience.batch.utils.BatchUtils;
+import net.musicaudience.domain.*;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.*;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.context.annotation.*;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import javax.sql.DataSource;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static net.musicaudience.Constants.*;
-import static net.musicaudience.batch.utils.BatchUtils.*;
-
 @Slf4j
 @Configuration
-@AllArgsConstructor
+@RequiredArgsConstructor
 @EnableBatchProcessing
 public class JobConfig {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final DataSource dataSource;
-    private Set<Long> importedArtists = ConcurrentHashMap.newKeySet();
-    private Set<Long> importedGenres = ConcurrentHashMap.newKeySet();
+    private final Set<Long> importedArtists = ConcurrentHashMap.newKeySet();
+    private final Set<Long> importedGenres = ConcurrentHashMap.newKeySet();
 
     @Bean
-    public Job importLogsJob() {
+    public Job musicDataImportJob() {
         return jobBuilderFactory.get("maxMusicDataImportJob")
                                 .incrementer(new RunIdIncrementer())
                                 .start(loadArtistsStep())
@@ -42,40 +40,47 @@ public class JobConfig {
 
     private Step loadArtistsStep() {
         var stepName = "loadArtists";
-        var filePath = "C:\\Users\\David\\Documents\\max\\artist.min";
+        var filePath = "C:\\Users\\David\\Documents\\max\\artist";
         var fieldSetMapper = new ArtistMapper();
         var query = "INSERT INTO artists (id, type_id, name, actual, url) VALUES(:id, :typeId, :name, :actual, :url)";
-        return buildStep(stepName, filePath, fieldSetMapper, query);
+        ItemProcessor<Artist, Artist> processor = artist -> {
+            importedArtists.add(artist.getId());
+            return artist;
+        };
+        return buildStep(stepName, filePath, fieldSetMapper, query, processor);
     }
 
     private Step loadGenresStep() {
         var stepName = "loadGenres";
-        var filePath = "C:\\Users\\David\\Documents\\max\\genre.min";
+        var filePath = "C:\\Users\\David\\Documents\\max\\genre";
         var fieldSetMapper = new GenreMapper();
         var query = "INSERT INTO genres (id, parent_id, name) VALUES(:id, :parentId, :name)";
-        return buildStep(stepName, filePath, fieldSetMapper, query);
+        ItemProcessor<Genre, Genre> processor = genre -> {
+            importedGenres.add(genre.getId());
+            return genre;
+        };
+        return buildStep(stepName, filePath, fieldSetMapper, query, processor);
     }
 
     private Step loadArtistsGenresStep() {
         var stepName = "loadArtistsGenres";
-        var filePath = "C:\\Users\\David\\Documents\\max\\genre_artist.min";
+        var filePath = "C:\\Users\\David\\Documents\\max\\genre_artist";
         var fieldSetMapper = new ArtistGenreMapper();
         var query = "INSERT INTO artists_genres (artist_id, genre_id, is_primary) VALUES(:artistId, :genreId, :primary)";
-        return buildStep(stepName, filePath, fieldSetMapper, query);
+        ItemProcessor<ArtistGenre, ArtistGenre> processor = artistGenre -> {
+            if(!importedArtists.contains(artistGenre.getArtistId()) || !importedGenres.contains(artistGenre.getGenreId())) {
+                return null;
+            }
+            return artistGenre;
+        };
+        return buildStep(stepName, filePath, fieldSetMapper, query, processor);
     }
 
-    private <T> Step buildStep(final String stepName, final String filePath, final FieldSetMapper<T> fieldSetMapper, final String query) {
-        var fileReader = getFileReader(fieldSetMapper, filePath);
-        var jdbcBatchWriter = getJdbcBatchWriter(dataSource, query);
-        var taskExecutor = new SimpleAsyncTaskExecutor();
-        return stepBuilderFactory.get(stepName).<T, T>chunk(DEFAULT_CHUNK_SIZE)
-                                               .reader(fileReader)
-                                               .writer(jdbcBatchWriter)
-                                               .faultTolerant()
-                                               .skip(DataIntegrityViolationException.class)
-                                               .skipLimit(Integer.MAX_VALUE)
-                                               .taskExecutor(taskExecutor)
-                                               .throttleLimit(THROTTLE_LIMIT)
-                                               .build();
+    private <T> Step buildStep(final String stepName,
+                               final String filePath,
+                               final FieldSetMapper<T> fieldSetMapper,
+                               final String query,
+                               final ItemProcessor<T, T> processor) {
+        return BatchUtils.buildStep(stepName, filePath, fieldSetMapper, query, processor, stepBuilderFactory, dataSource);
     }
 }
