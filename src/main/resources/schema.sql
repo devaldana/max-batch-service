@@ -12,14 +12,14 @@ CREATE TABLE artists (
 
 CREATE TABLE genres (
     id        BIGINT NOT NULL PRIMARY KEY,
-    parent_id BIGINT NOT NULL,
-    name      VARCHAR(200)
+    parent_id BIGINT,
+    name      VARCHAR(200) NOT NULL
 );
 
 CREATE TABLE artists_genres (
     artist_id  BIGINT NOT NULL,
     genre_id   BIGINT NOT NULL,
-    is_primary TINYINT(1),
+    is_primary TINYINT(1) NOT NULL,
 
     PRIMARY KEY (artist_id, genre_id),
     CONSTRAINT fk_to_artists FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE,
