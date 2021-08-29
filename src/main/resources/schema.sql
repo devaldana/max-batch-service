@@ -6,6 +6,7 @@ CREATE TABLE artists (
     id      BIGINT NOT NULL PRIMARY KEY,
     type_id BIGINT NOT NULL,
     name    VARCHAR(1000),
+    actual  TINYINT(1),
     url     VARCHAR(1000)
 );
 
