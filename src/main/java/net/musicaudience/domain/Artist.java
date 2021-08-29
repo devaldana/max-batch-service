@@ -1,8 +1,9 @@
 package net.musicaudience.domain;
 
-import lombok.Data;
+import lombok.*;
 
 @Data
+@Builder
 public class Artist {
     private Long id;
     private boolean isActual;

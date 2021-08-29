@@ -22,5 +22,5 @@ CREATE TABLE artists_genres (
 
     PRIMARY KEY (artist_id, genre_id),
     CONSTRAINT fk_to_artists FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE,
-    CONSTRAINT fk_to_genres FOREIGN KEY (genre_id) REFERENCES genres (id) ON DELETE CASCADE
+    CONSTRAINT fk_to_genres  FOREIGN KEY (genre_id)  REFERENCES genres (id)  ON DELETE CASCADE
 );
