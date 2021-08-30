@@ -1,14 +1,14 @@
-### Quick start guide
+# Quick start guide
 This guide assumes that you have Docker installed. Execute the `start.sh` or the `start.bat` depending on whether you use Linux/Mac or Windows.
 Note that for Linux/Mac users one extra step is required: you have to give execution permissions to `start.sh`, to achieve that, execute `sudo chmod +x start.sh`.
 
-#### Linux/Mac execution example
+### Linux/Mac execution example
 ```
 > sudo chmod +x start.sh
 > sh start.sh /Users/David/projects/max-batch-service/data
 ```
 
-#### Windows execution example
+### Windows execution example
 ```
 > start.bat C:\Users\David\projects\max-batch-service\data
 ```
@@ -16,7 +16,7 @@ Note that for Linux/Mac users one extra step is required: you have to give execu
 Note that the script receives one parameter, it's the path of the folder containing the required files: `artist`, `genre` and `genre_artist`.
 This script compiles, packages and executes the application which turn will use the given folder path to load those records to database.
 
-#### Linux/Mac execution example
+### Linux/Mac execution example
 Here some sample queries:
 ```
 -- Give me all the artists
@@ -43,7 +43,8 @@ INNER JOIN genres g ON g.id = ag.genre_id
 WHERE ag.is_primary AND a.actual
 ORDER BY g.name;
 
--- Give me the number of artists per each genre where the number of artist is greater than or equal to 100 - exclude duplicated records from each genre.
+-- Give me the number of artists per each genre where the number of artist is greater than or equal to 100
+-- exclude duplicated records from each genre.
 SELECT g.name, COUNT(ag.artist_id)
 FROM artists_genres ag 
 INNER JOIN genres g ON g.id = ag.genre_id AND ag.is_primary
@@ -52,7 +53,7 @@ HAVING COUNT(ag.artist_id) >= 100
 ORDER BY COUNT(ag.artist_id) DESC;
 ```
 
-#### System design - some details
+### System design - some details
 This application was developed using Java programming language and [Spring Batch](https://spring.io/projects/spring-batch), which is:
 > A lightweight, comprehensive batch framework designed to enable the development of robust batch applications vital for the daily operations of enterprise systems.
 
@@ -66,7 +67,7 @@ we're running the steps in sequential mode.
 
 It was developed in a modular way so adding new steps is straightforward.
 
-#### Things to improve
+### Things to improve
 * Unfortunately I was not able to add unit/integration tests because of lack of time, so, tests are required to be implemented.
 * More comments explaining some parts of the code should be added - I will explain everything on our code review.
 * We should add more logs for debugging purpose.

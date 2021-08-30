@@ -1,0 +1,70 @@
+<div style="margin: 0 auto 0 auto; padding: 20px 0 80px 0; max-width: 70%">
+<h1 id="quick-start-guide">Quick start guide</h1>
+<p>This guide assumes that you have Docker installed. Execute the <code>start.sh</code> or the <code>start.bat</code> depending on whether you use Linux/Mac or Windows.
+Note that for Linux/Mac users one extra step is required: you have to give execution permissions to <code>start.sh</code>, to achieve that, execute <code>sudo chmod +x start.sh</code>.</p>
+<h3 id="linux-mac-execution-example">Linux/Mac execution example</h3>
+<pre><code>&gt; sudo chmod +x start<span class="hljs-selector-class">.sh</span>
+&gt; sh start<span class="hljs-selector-class">.sh</span> /Users/David/projects/max-batch-service/data
+</code></pre><h3 id="windows-execution-example">Windows execution example</h3>
+<pre><code>&gt; start.bat C:<span class="hljs-symbol">\U</span>sers<span class="hljs-symbol">\D</span>avid<span class="hljs-symbol">\p</span>rojects<span class="hljs-symbol">\m</span>ax-batch-service<span class="hljs-symbol">\d</span>ata
+</code></pre><p>Note that the script receives one parameter, it&#39;s the path of the folder containing the required files: <code>artist</code>, <code>genre</code> and <code>genre_artist</code>.
+This script compiles, packages and executes the application which turn will use the given folder path to load those records to database.</p>
+<h3 id="linux-mac-execution-example">Linux/Mac execution example</h3>
+<p>Here some sample queries:</p>
+<pre><code><span class="hljs-comment">-- Give me all the artists</span>
+<span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> artists;
+
+<span class="hljs-comment">-- Give me all the genres</span>
+<span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> genres;
+
+<span class="hljs-comment">-- Give me all the non-actual artists</span>
+<span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> artists
+<span class="hljs-keyword">WHERE</span> actual <span class="hljs-keyword">IS</span> <span class="hljs-literal">FALSE</span>;
+
+<span class="hljs-comment">-- Give me numbers of the artists which have Pop (ID=34) as secondary genre</span>
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">count</span>(a.id)
+<span class="hljs-keyword">FROM</span> artists a
+<span class="hljs-keyword">INNER</span> <span class="hljs-keyword">JOIN</span> artists_genres ag <span class="hljs-keyword">ON</span> ag.artist_id = a.id
+<span class="hljs-keyword">WHERE</span> ag.is_primary <span class="hljs-keyword">IS</span> <span class="hljs-literal">FALSE</span> <span class="hljs-keyword">AND</span> ag.genre_id = <span class="hljs-number">34</span>;
+
+<span class="hljs-comment">-- Give me all the actual artists with their primary music genre ordered by genre name</span>
+<span class="hljs-keyword">SELECT</span> g.name <span class="hljs-keyword">AS</span> genre, a.name <span class="hljs-keyword">AS</span> artist
+<span class="hljs-keyword">FROM</span> artists a
+<span class="hljs-keyword">INNER</span> <span class="hljs-keyword">JOIN</span> artists_genres ag <span class="hljs-keyword">ON</span> ag.artist_id = a.id
+<span class="hljs-keyword">INNER</span> <span class="hljs-keyword">JOIN</span> genres g <span class="hljs-keyword">ON</span> g.id = ag.genre_id
+<span class="hljs-keyword">WHERE</span> ag.is_primary <span class="hljs-keyword">AND</span> a.actual
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> g.name;
+
+<span class="hljs-comment">-- Give me the number of artists per each genre where the number of artist is greater than or equal to 100</span>
+<span class="hljs-comment">-- exclude duplicated records from each genre.</span>
+<span class="hljs-keyword">SELECT</span> g.name, <span class="hljs-keyword">COUNT</span>(ag.artist_id)
+<span class="hljs-keyword">FROM</span> artists_genres ag 
+<span class="hljs-keyword">INNER</span> <span class="hljs-keyword">JOIN</span> genres g <span class="hljs-keyword">ON</span> g.id = ag.genre_id <span class="hljs-keyword">AND</span> ag.is_primary
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> (ag.genre_id)
+<span class="hljs-keyword">HAVING</span> <span class="hljs-keyword">COUNT</span>(ag.artist_id) &gt;= <span class="hljs-number">100</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> <span class="hljs-keyword">COUNT</span>(ag.artist_id) <span class="hljs-keyword">DESC</span>;
+</code></pre><h3 id="system-design-some-details">System design - some details</h3>
+<p>This application was developed using Java programming language and <a href="https://spring.io/projects/spring-batch">Spring Batch</a>, which is:</p>
+<blockquote>
+<p>A lightweight, comprehensive batch framework designed to enable the development of robust batch applications vital for the daily operations of enterprise systems.</p>
+</blockquote>
+<p>This application loads the data to database in three steps: <em>loadArtists</em>, <em>loadGenres</em> and <em>loadArtistsGenres</em>.
+Each step has a <em>reader</em>, a <em>mapper</em>, a <em>processor</em> and a <em>writer</em>. For each step a chunk size can be defined and each chunk of data is processed in
+a different <em>thread</em>. Write to database is done in batches of the same chunk size.</p>
+<p>You may guess that we can run <em>loadArtists</em> and <em>loadGenres</em> in parallel and then continue with <em>loadArtistsGenres</em>, you are right, however,
+for the sake of simplicity and considering that they will be executed on the same node/computer/processor, and it&#39;s compute/IO intensive operation,
+we&#39;re running the steps in sequential mode.</p>
+<p>It was developed in a modular way so adding new steps is straightforward.</p>
+<h3 id="things-to-improve">Things to improve</h3>
+<ul>
+<li>Unfortunately I was not able to add unit/integration tests because of lack of time, so, tests are required to be implemented.</li>
+<li>More comments explaining some parts of the code should be added - I will explain everything on our code review.</li>
+<li>We should add more logs for debugging purpose.</li>
+<li>Code documentation is also pending, so, it should be added.</li>
+<li>Probably it would be a good idea to add indexes for some columns.</li>
+<li>I don&#39;t like too much the way the data-integrity-violation-exceptions are handled, using some record of the already processed artists and genres might not be enough.</li>
+<li>Would be nice to have another table for recording the imported data meta-data.</li>
+<li>This document itself need to be improved to explain more technical decisions and the way the project works behind the scenes.</li>
+</ul>
+<p><a href="https://devspods.com/">https://devspods.com/</a></p>
+</div>
