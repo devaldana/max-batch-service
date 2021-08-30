@@ -16,6 +16,42 @@ Note that for Linux/Mac users one extra step is required: you have to give execu
 Note that the script receives one parameter, it's the path of the folder containing the required files: `artist`, `genre` and `genre_artist`.
 This script compiles, packages and executes the application which turn will use the given folder path to load those records to database.
 
+#### Linux/Mac execution example
+Here some sample queries:
+```
+-- Give me all the artists
+SELECT * FROM artists;
+
+-- Give me all the genres
+SELECT * FROM genres;
+
+-- Give me all the non-actual artists
+SELECT * FROM artists
+WHERE actual IS FALSE;
+
+-- Give me numbers of the artists which have Pop (ID=34) as secondary genre
+SELECT count(a.id)
+FROM artists a
+INNER JOIN artists_genres ag ON ag.artist_id = a.id
+WHERE ag.is_primary IS FALSE AND ag.genre_id = 34;
+
+-- Give me all the actual artists with their primary music genre ordered by genre name
+SELECT g.name AS genre, a.name AS artist
+FROM artists a
+INNER JOIN artists_genres ag ON ag.artist_id = a.id
+INNER JOIN genres g ON g.id = ag.genre_id
+WHERE ag.is_primary AND a.actual
+ORDER BY g.name;
+
+-- Give me the number of artists per each genre where the number of artist is greater than or equal to 100 - exclude duplicated records from each genre.
+SELECT g.name, COUNT(ag.artist_id)
+FROM artists_genres ag 
+INNER JOIN genres g ON g.id = ag.genre_id AND ag.is_primary
+GROUP BY (ag.genre_id)
+HAVING COUNT(ag.artist_id) >= 100
+ORDER BY COUNT(ag.artist_id) DESC;
+```
+
 #### System design - some details
 This application was developed using Java programming language and [Spring Batch](https://spring.io/projects/spring-batch), which is:
 > A lightweight, comprehensive batch framework designed to enable the development of robust batch applications vital for the daily operations of enterprise systems.
@@ -35,6 +71,7 @@ It was developed in a modular way so adding new steps is straightforward.
 * More comments explaining some parts of the code should be added - I will explain everything on our code review.
 * We should add more logs for debugging purpose.
 * Code documentation is also pending, so, it should be added.
+* Probably it would be a good idea to add indexes for some columns.
 * I don't like too much the way the data-integrity-violation-exceptions are handled, using some record of the already processed artists and genres might not be enough.
 * Would be nice to have another table for recording the imported data meta-data.
 * This document itself need to be improved to explain more technical decisions and the way the project works behind the scenes.
