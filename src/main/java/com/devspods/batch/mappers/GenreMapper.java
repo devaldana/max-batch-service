@@ -1,6 +1,6 @@
-package net.musicaudience.batch.mappers;
+package com.devspods.batch.mappers;
 
-import net.musicaudience.domain.Genre;
+import com.devspods.domain.Genre;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.transform.FieldSet;
 

@@ -1,4 +1,4 @@
-package net.musicaudience.util;
+package com.devspods.util;
 
 public final class Constants {
     public static final char FIELD_SEPARATOR_CHARACTER = 1;

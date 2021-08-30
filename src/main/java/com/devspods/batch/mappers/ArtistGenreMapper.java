@@ -1,10 +1,9 @@
-package net.musicaudience.batch.mappers;
+package com.devspods.batch.mappers;
 
-import net.musicaudience.domain.ArtistGenre;
+import com.devspods.util.Constants;
+import com.devspods.domain.ArtistGenre;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.transform.FieldSet;
-
-import static net.musicaudience.util.Constants.TRUE;
 
 public class ArtistGenreMapper implements FieldSetMapper<ArtistGenre> {
     @Override
@@ -12,7 +11,7 @@ public class ArtistGenreMapper implements FieldSetMapper<ArtistGenre> {
         return fieldSet.getFieldCount() < 3 ? null : ArtistGenre.builder()
                                                                 .genreId(fieldSet.readLong(1))
                                                                 .artistId(fieldSet.readLong(2))
-                                                                .primary(fieldSet.readInt(3) == TRUE)
+                                                                .primary(fieldSet.readInt(3) == Constants.TRUE)
                                                                 .build();
     }
 }

@@ -8,7 +8,7 @@
         <version>2.5.4</version>
         <relativePath/>
     </parent>
-    <groupId>net.musicaudience</groupId>
+    <groupId>com.devspods</groupId>
     <artifactId>max-batch-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>max-batch-service</name>

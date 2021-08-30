@@ -1,10 +1,10 @@
-package net.musicaudience.config;
+package com.devspods.config;
 
+import com.devspods.batch.BatchUtils;
+import com.devspods.batch.mappers.*;
+import com.devspods.domain.*;
+import com.devspods.util.*;
 import lombok.RequiredArgsConstructor;
-import net.musicaudience.batch.BatchUtils;
-import net.musicaudience.batch.mappers.*;
-import net.musicaudience.domain.*;
-import net.musicaudience.util.*;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.*;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
@@ -15,8 +15,6 @@ import org.springframework.context.annotation.*;
 import javax.sql.DataSource;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static net.musicaudience.util.Constants.*;
 
 @Configuration
 @RequiredArgsConstructor
@@ -44,21 +42,21 @@ public class JobConfig {
         var stepName = "loadArtists";
         var filePath = argumentsData.getArtistsFilePath();
         var fieldSetMapper = new ArtistMapper();
-        return buildStep(stepName, filePath, fieldSetMapper, INSERT_ARTIST_QUERY, this::artistProcessor);
+        return buildStep(stepName, filePath, fieldSetMapper, Constants.INSERT_ARTIST_QUERY, this::artistProcessor);
     }
 
     private Step loadGenresStep() {
         var stepName = "loadGenres";
         var filePath = argumentsData.getGenresFilePath();
         var fieldSetMapper = new GenreMapper();
-        return buildStep(stepName, filePath, fieldSetMapper, INSERT_GENRE_QUERY, this::genreProcessor);
+        return buildStep(stepName, filePath, fieldSetMapper, Constants.INSERT_GENRE_QUERY, this::genreProcessor);
     }
 
     private Step loadArtistsGenresStep() {
         var stepName = "loadArtistsGenres";
         var filePath = argumentsData.getArtistsGenresFilePath();
         var fieldSetMapper = new ArtistGenreMapper();
-        return buildStep(stepName, filePath, fieldSetMapper, INSERT_ARTIST_GENRE_QUERY, this::artistGenreProcessor);
+        return buildStep(stepName, filePath, fieldSetMapper, Constants.INSERT_ARTIST_GENRE_QUERY, this::artistGenreProcessor);
     }
 
     private Artist artistProcessor(final Artist artist) {

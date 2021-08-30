@@ -1,4 +1,4 @@
-package net.musicaudience.domain;
+package com.devspods.domain;
 
 import lombok.*;
 

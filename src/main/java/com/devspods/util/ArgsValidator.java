@@ -1,4 +1,4 @@
-package net.musicaudience.util;
+package com.devspods.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -7,7 +7,6 @@ import java.io.File;
 import java.nio.file.*;
 import java.util.List;
 
-import static net.musicaudience.util.Constants.*;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Slf4j
@@ -24,12 +23,12 @@ public final class ArgsValidator {
     private static void validateArgsNames(final ApplicationArguments args){
         log.info("Validating args names...");
         var argsNames = args.getOptionNames();
-        if(!argsNames.contains(FILES_FOLDER_PATH_ARG)) throw new IllegalArgumentException("At least one argument is missing.");
+        if(!argsNames.contains(Constants.FILES_FOLDER_PATH_ARG)) throw new IllegalArgumentException("At least one argument is missing.");
     }
 
     private static void validateArgsValues(final ApplicationArguments args) {
         log.info("Validating args values...");
-        var filesFolderPath = args.getOptionValues(FILES_FOLDER_PATH_ARG);
+        var filesFolderPath = args.getOptionValues(Constants.FILES_FOLDER_PATH_ARG);
         validateArgsLists(filesFolderPath);
         validateFilesFolderPath(filesFolderPath.get(0));
     }
@@ -47,9 +46,9 @@ public final class ArgsValidator {
     private static void validateFilesFolderPath(final String filesFolderPath) {
         log.info("Validating filesLocation argument: {}", filesFolderPath);
         try {
-            validateFileIsAccessible(filesFolderPath, ARTISTS_FILE_NAME);
-            validateFileIsAccessible(filesFolderPath, GENRES_FILE_NAME);
-            validateFileIsAccessible(filesFolderPath, ARTISTS_GENRES_FILE_NAME);
+            validateFileIsAccessible(filesFolderPath, Constants.ARTISTS_FILE_NAME);
+            validateFileIsAccessible(filesFolderPath, Constants.GENRES_FILE_NAME);
+            validateFileIsAccessible(filesFolderPath, Constants.ARTISTS_GENRES_FILE_NAME);
         } catch (InvalidPathException exception) {
             throw new IllegalArgumentException("Error reading files: make sure the folder exists and the files have the required names", exception);
         }
