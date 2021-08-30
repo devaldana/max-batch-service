@@ -15,6 +15,5 @@ public final class Constants {
     public static final String INSERT_GENRE_QUERY = "INSERT INTO genres (id, parent_id, name) VALUES(:id, :parentId, :name)";
     public static final String INSERT_ARTIST_GENRE_QUERY = "INSERT INTO artists_genres (artist_id, genre_id, is_primary) VALUES(:artistId, :genreId, :primary)";
 
-
     private Constants(){}
 }
