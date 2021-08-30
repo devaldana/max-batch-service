@@ -1,4 +1,4 @@
-package net.musicaudience.batch.utils;
+package net.musicaudience.batch;
 
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -13,7 +13,7 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 import javax.sql.DataSource;
 
-import static net.musicaudience.Constants.*;
+import static net.musicaudience.util.Constants.*;
 
 public final class BatchUtils {
     private BatchUtils() {}

@@ -1,10 +1,10 @@
-package net.musicaudience.batch;
+package net.musicaudience.config;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import net.musicaudience.batch.BatchUtils;
 import net.musicaudience.batch.mappers.*;
-import net.musicaudience.batch.utils.BatchUtils;
 import net.musicaudience.domain.*;
+import net.musicaudience.util.*;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.*;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
@@ -16,6 +16,8 @@ import javax.sql.DataSource;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static net.musicaudience.util.Constants.*;
+
 @Configuration
 @RequiredArgsConstructor
 @EnableBatchProcessing
@@ -24,6 +26,7 @@ public class JobConfig {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final DataSource dataSource;
+    private final ArgumentsData argumentsData;
     private final Set<Long> importedArtists = ConcurrentHashMap.newKeySet();
     private final Set<Long> importedGenres = ConcurrentHashMap.newKeySet();
 
@@ -39,40 +42,40 @@ public class JobConfig {
 
     private Step loadArtistsStep() {
         var stepName = "loadArtists";
-        var filePath = "C:\\Users\\David\\Documents\\max\\artist";
+        var filePath = argumentsData.getArtistsFilePath();
         var fieldSetMapper = new ArtistMapper();
-        var query = "INSERT INTO artists (id, type_id, name, actual, url) VALUES(:id, :typeId, :name, :actual, :url)";
-        ItemProcessor<Artist, Artist> processor = artist -> {
-            importedArtists.add(artist.getId());
-            return artist;
-        };
-        return buildStep(stepName, filePath, fieldSetMapper, query, processor);
+        return buildStep(stepName, filePath, fieldSetMapper, INSERT_ARTIST_QUERY, this::artistProcessor);
     }
 
     private Step loadGenresStep() {
         var stepName = "loadGenres";
-        var filePath = "C:\\Users\\David\\Documents\\max\\genre";
+        var filePath = argumentsData.getGenresFilePath();
         var fieldSetMapper = new GenreMapper();
-        var query = "INSERT INTO genres (id, parent_id, name) VALUES(:id, :parentId, :name)";
-        ItemProcessor<Genre, Genre> processor = genre -> {
-            importedGenres.add(genre.getId());
-            return genre;
-        };
-        return buildStep(stepName, filePath, fieldSetMapper, query, processor);
+        return buildStep(stepName, filePath, fieldSetMapper, INSERT_GENRE_QUERY, this::genreProcessor);
     }
 
     private Step loadArtistsGenresStep() {
         var stepName = "loadArtistsGenres";
-        var filePath = "C:\\Users\\David\\Documents\\max\\genre_artist";
+        var filePath = argumentsData.getArtistsGenresFilePath();
         var fieldSetMapper = new ArtistGenreMapper();
-        var query = "INSERT INTO artists_genres (artist_id, genre_id, is_primary) VALUES(:artistId, :genreId, :primary)";
-        ItemProcessor<ArtistGenre, ArtistGenre> processor = artistGenre -> {
-            if(!importedArtists.contains(artistGenre.getArtistId()) || !importedGenres.contains(artistGenre.getGenreId())) {
-                return null;
-            }
-            return artistGenre;
-        };
-        return buildStep(stepName, filePath, fieldSetMapper, query, processor);
+        return buildStep(stepName, filePath, fieldSetMapper, INSERT_ARTIST_GENRE_QUERY, this::artistGenreProcessor);
+    }
+
+    private Artist artistProcessor(final Artist artist) {
+        importedArtists.add(artist.getId());
+        return artist;
+    }
+
+    private Genre genreProcessor(final Genre genre) {
+        importedGenres.add(genre.getId());
+        return genre;
+    }
+
+    private ArtistGenre artistGenreProcessor(final ArtistGenre artistGenre) {
+        if (!importedArtists.contains(artistGenre.getArtistId()) || !importedGenres.contains(artistGenre.getGenreId())) {
+            return null;
+        }
+        return artistGenre;
     }
 
     private <T> Step buildStep(final String stepName,

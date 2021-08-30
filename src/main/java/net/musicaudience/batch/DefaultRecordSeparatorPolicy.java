@@ -1,8 +1,8 @@
-package net.musicaudience.batch.utils;
+package net.musicaudience.batch;
 
 import org.springframework.batch.item.file.separator.SimpleRecordSeparatorPolicy;
 
-import static net.musicaudience.Constants.RECORD_SEPARATOR_CHARACTER;
+import static net.musicaudience.util.Constants.RECORD_SEPARATOR_CHARACTER;
 
 public class DefaultRecordSeparatorPolicy extends SimpleRecordSeparatorPolicy {
     @Override

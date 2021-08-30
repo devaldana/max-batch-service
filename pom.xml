@@ -38,6 +38,7 @@
     </dependencies>
 
     <build>
+        <finalName>max-batch-service</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

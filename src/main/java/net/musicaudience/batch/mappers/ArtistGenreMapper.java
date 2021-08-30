@@ -4,7 +4,7 @@ import net.musicaudience.domain.ArtistGenre;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.transform.FieldSet;
 
-import static net.musicaudience.Constants.TRUE;
+import static net.musicaudience.util.Constants.TRUE;
 
 public class ArtistGenreMapper implements FieldSetMapper<ArtistGenre> {
     @Override
