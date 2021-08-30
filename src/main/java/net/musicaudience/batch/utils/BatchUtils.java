@@ -66,7 +66,7 @@ public final class BatchUtils {
 
     public static <T> DefaultLineMapper<T> getDefaultLineMapper(final FieldSetMapper<T> fieldSetMapper) {
         var lineMapper = new DefaultLineMapper<T>();
-        lineMapper.setLineTokenizer(getDelimitedLineTokenizer(DELIMITER_CHARACTER, QUOTE_CHARACTER));
+        lineMapper.setLineTokenizer(getDelimitedLineTokenizer(FIELD_SEPARATOR_CHARACTER, QUOTE_CHARACTER));
         lineMapper.setFieldSetMapper(fieldSetMapper);
         return lineMapper;
     }

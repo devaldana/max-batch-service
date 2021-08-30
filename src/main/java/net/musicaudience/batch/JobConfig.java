@@ -16,7 +16,6 @@ import javax.sql.DataSource;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Slf4j
 @Configuration
 @RequiredArgsConstructor
 @EnableBatchProcessing
