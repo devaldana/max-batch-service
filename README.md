@@ -16,8 +16,7 @@ Note that for Linux/Mac users one extra step is required: you have to give execu
 Note that the script receives one parameter, it's the path of the folder containing the required files: `artist`, `genre` and `genre_artist`.
 This script compiles, packages and executes the application which turn will use the given folder path to load those records to database.
 
-### Linux/Mac execution example
-Here some sample queries:
+### Sample queries
 ```
 -- Give me all the artists
 SELECT * FROM artists;
@@ -29,11 +28,11 @@ SELECT * FROM genres;
 SELECT * FROM artists
 WHERE actual IS FALSE;
 
--- Give me numbers of the artists which have Pop (ID=34) as secondary genre
+-- Give me numbers of the artists which have Pop (ID=14) as secondary genre
 SELECT count(a.id)
 FROM artists a
 INNER JOIN artists_genres ag ON ag.artist_id = a.id
-WHERE ag.is_primary IS FALSE AND ag.genre_id = 34;
+WHERE ag.is_primary IS FALSE AND ag.genre_id = 14;
 
 -- Give me all the actual artists with their primary music genre ordered by genre name
 SELECT g.name AS genre, a.name AS artist
@@ -44,7 +43,7 @@ WHERE ag.is_primary AND a.actual
 ORDER BY g.name;
 
 -- Give me the number of artists per each genre where the number of artist is greater than or equal to 100
--- exclude duplicated records from each genre.
+-- exclude duplicated records from each genre and order descending by count.
 SELECT g.name, COUNT(ag.artist_id)
 FROM artists_genres ag 
 INNER JOIN genres g ON g.id = ag.genre_id AND ag.is_primary
